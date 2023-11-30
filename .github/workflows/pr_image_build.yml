@@ -8,7 +8,7 @@ env:
   GO_VER: 1.21
   GO_TAGS: ""
   REGISTRY: ghcr.io
-  OPERATOR_IMAGE_NAME: ${{ github.repository }}
+  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   image:
