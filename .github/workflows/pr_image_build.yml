@@ -1,0 +1,45 @@
+name: Pull Request Build image
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+env:
+  GO_VER: 1.21
+  GO_TAGS: ""
+  REGISTRY: ghcr.io
+  OPERATOR_IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Login to the ghcr Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+      - name: Build and push
+        id: push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile
+          labels: ${{ steps.meta.outputs.labels }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:debug
+            ${{ steps.meta.outputs.tags }}
+          push: true
